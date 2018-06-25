@@ -20,7 +20,7 @@ import Auth from './common/eos';
 
 const styles = {
     root: {
-        flexGrow: 1,
+    //    flexGrow: 1,
     },
     content: {
         padding: 10
