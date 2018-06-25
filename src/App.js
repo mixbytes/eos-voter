@@ -42,6 +42,14 @@ const theme = createMuiTheme({
 });
 
 class App extends React.Component {
+    componentDidMount() {
+        this.onChangeNet = Auth.onChangeNet(() => {this.forceUpdate()});
+    }
+
+    componentWillUnmount() {
+        Auth.removeOnChangeNet(this.onChangeNet);
+    }
+
     render() {
         const {classes} = this.props;
         return (

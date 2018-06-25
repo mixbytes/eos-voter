@@ -1,4 +1,6 @@
 import conf from '../config';
+import Cookie from 'js-cookie'
+
 const Eos = require('eosjs');
 
 class Auth {
@@ -7,7 +9,7 @@ class Auth {
             console.log('scatter loaded');
             this.scatter = window.scatter;
 
-            this.scatter.requireVersion(4.0);
+            this.scatter.requireVersion(5.0);
         }
         else {
             document.addEventListener('scatterLoaded', () => {
@@ -21,24 +23,56 @@ class Auth {
         this.afterLogin = new Promise((resolve) => {
             this.onLogin = resolve;
         });
+
+        this.selectedNet = Cookie.get('network') || conf.defaultNetwork;
+        this.network = conf.network[this.selectedNet];
+
+        this.eos = Eos.modules.api({
+            chainId: this.network.chainId, httpEndpoint: this.network.protocol + '://' +
+            this.network.host + ':' +this.network.port,
+        });
+
+        console.log(this.selectedNet);
     }
-
-    network = {
-        blockchain:'eos',
-        host: conf.host,
-        port: conf.port,
-        protocol: conf.protocol
-    };
-
-    eos = Eos.modules.api({
-        chainId: conf.chainId, httpEndpoint: conf.protocol + '://' +
-                this.network.host + ':' +this.network.port,
-    });
 
     scatter = null;
     identity = null;
     selectedAcc = 0;
     logged = false;
+
+    onChangeNetCbs = [];
+
+    removeOnChangeNet(idx) {
+        delete this.onChangeNetCbs[idx];
+    }
+
+    onChangeNet(cb) {
+        this.onChangeNetCbs.push(cb);
+    }
+
+    async changeNetwork(net = 'jungle') {
+        if (conf.network[net] === undefined)
+            return;
+
+        this.selectedNet = net;
+        Cookie.set('network', net);
+
+        this.afterLogin = new Promise((resolve) => {
+            this.onLogin = resolve;
+        });
+
+        this.network = conf.network[net];
+
+        this.identity = null;
+        this.logged = false;
+
+        this.eos = Eos.modules.api({
+            chainId: this.network.chainId, httpEndpoint: this.network.protocol + '://' +
+            this.network.host + ':' +this.network.port,
+        });
+
+        this.onChangeNetCbs.forEach(cb => {if (cb) cb()});
+    }
 
     async login() {
         if (!this.scatter) {
@@ -47,11 +81,27 @@ class Auth {
         }
 
         try {
-            await this.scatter.suggestNetwork(this.network);
-            console.log('Suggest network OK');
+            let forSuggest = {
+                blockchain: 'eos',
+                host: this.network.host,
+                port: this.network.port,
+                chainId: this.network.byChainId ? this.network.chainId : null
+            };
 
-            this.identity = await this.scatter.getIdentity({accounts: [this.network]});
-            this.eos = this.scatter.eos(this.network, Eos, {chainId: conf.chainId}, conf.protocol);
+            let t = await this.scatter.suggestNetwork(forSuggest);
+            console.log('Suggest network: ', t);
+
+          /*  let t = setTimeout(() => {
+                if (!this.isLogged())
+                    alert('Identity not found, check scatter');
+            }, conf.scatterTimeout * 10);
+            */
+
+            this.identity = await this.scatter.getIdentity({accounts: [forSuggest]});
+
+          //  clearTimeout(t);
+
+            this.eos = this.scatter.eos(forSuggest, Eos, {chainId: this.network.chainId}, this.network.protocol);
 
             this.onLogin();
             this.logged = true;
@@ -66,16 +116,9 @@ class Auth {
 
         let acc = await this.eos.getAccount(this.identity.accounts[this.selectedAcc].name);
 
-        let balanceRows = await this.eos.getTableRows({
-            json: true,
-            code: 'eosio.token',
-            scope: this.identity.accounts[this.selectedAcc].name,
-            table: 'accounts',
-            limit: 500
-        });
+        let balance = await this.eos.getCurrencyBalance('eosio.token', this.identity.accounts[this.selectedAcc].name, 'EOS');
 
-        let row = balanceRows.rows.find(r => r.balance.endsWith('EOS'));
-        acc.balance = row.balance;
+        acc.balance = balance[0] ? balance[0] : '0.0000 EOS';
 
         return acc;
     }

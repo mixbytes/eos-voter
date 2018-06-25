@@ -103,7 +103,7 @@ class AccountInfo extends React.Component {
             data: [
                 {key: "Account Name", value: '--'},
                 {key: "Total Balance", value: '--'},
-                {key: "Unstacked Balance", value: '--'},
+                {key: "Unstacked (liquid / for refund)", value: '--'},
                 {key: "Stacked for CPU", value: '--'},
                 {key: "Stacked for NET", value: '--'},
             ],
@@ -119,16 +119,32 @@ class AccountInfo extends React.Component {
         this.fetchData();
     }
 
+    componentDidMount() {
+        this.onChangeNet = Auth.onChangeNet(() => {this.fetchData()});
+    }
+
+    componentWillUnmount() {
+        Auth.removeOnChangeNet(this.onChangeNet);
+    }
+
     fetchData() {
         Auth.accountInfo().then(acc => {
-            let totalBalance = (parseFloat(acc.balance.split(' ')[0]) +
+            let totalBalance =
+                parseFloat(acc.balance.split(' ')[0]) +
                 parseFloat(acc.total_resources.cpu_weight.split(' ')[0]) +
-                parseFloat(acc.total_resources.net_weight.split(' ')[0])).toFixed(4);
+                parseFloat(acc.total_resources.net_weight.split(' ')[0]);
+
+            let forRefund = 0.0;
+            if (acc.refund_request)
+                forRefund = parseFloat(acc.refund_request.cpu_amount.split(' ')[0])
+                    + parseFloat(acc.refund_request.net_amount.split(' ')[0]);
+
+            totalBalance = (totalBalance + forRefund).toFixed(4);
 
             let data = this.state.data;
             data[0].value = acc.account_name;
             data[1].value = totalBalance + ' EOS';
-            data[2].value = acc.balance;
+            data[2].value = acc.balance + ' / ' + forRefund.toFixed(4) + ' EOS';
             data[3].value = acc.total_resources.cpu_weight;
             data[4].value = acc.total_resources.net_weight;
 
@@ -144,11 +160,26 @@ class AccountInfo extends React.Component {
 
         Auth.withEos(eos => {
             eos.transaction(tr => {
-                tr.delegatebw({
+                let method = 'delegatebw';
+                let stake_cpu_field = 'stake_cpu_quantity';
+                let stake_net_field = 'stake_net_quantity';
+                if (data.net[0] === '-' && data.cpu[0] === '-' ) {
+                    data.net = data.net.slice(1);
+                    data.cpu = data.cpu.slice(1);
+                    method = 'undelegatebw';
+                    stake_cpu_field = 'un' + stake_cpu_field;
+                    stake_net_field = 'un' + stake_net_field;
+                }
+
+                console.log(data);
+
+                tr[method]({
                     from: this.state.acc.account_name,
                     receiver: this.state.acc.account_name,
-                    stake_net_quantity: data.net + ' EOS',
-                    stake_cpu_quantity: data.cpu + ' EOS',
+
+                    [stake_cpu_field]: data.net + ' EOS',
+                    [stake_net_field]: data.cpu + ' EOS',
+
                     transfer: 0
                 }, {
                     authorization: this.state.acc.account_name
@@ -160,6 +191,25 @@ class AccountInfo extends React.Component {
                 if (typeof e === 'string')
                     e = JSON.parse(e);
                 this.showSnack("Fail Stake: " + e.message);
+            })
+        })
+    }
+
+    refund() {
+        Auth.withEos(eos => {
+            eos.transaction(tr => {
+                tr.refund({
+                    owner: this.state.acc.account_name,
+                }, {
+                    authorization: this.state.acc.account_name
+                });
+            }).then(() => {
+                this.showSnack("Success Refund", 1500);
+                this.fetchData();
+            }).catch((e) => {
+                if (typeof e === 'string')
+                    e = JSON.parse(e);
+                this.showSnack("Fail Refund: " + e.message);
             })
         })
     }
@@ -189,7 +239,7 @@ class AccountInfo extends React.Component {
         if (val === '')
             return !!required ? 'Field is required' : '';
 
-        if (val.search(/^\d+\.\d{4}$/) === -1)
+        if (val.search(/^-?\d+\.\d{4}$/) === -1)
             return 'Required value with 4 decimals';
 
         return '';
@@ -227,6 +277,12 @@ class AccountInfo extends React.Component {
                         fullWidth
                         onClick={() => this.setState({openDialog: true})}
                     >Stake</Button>
+                    <Button
+                        color="primary"
+                        variant="raised"
+                        fullWidth
+                        onClick={() => this.refund()}
+                    >Refund</Button>
                 </CardActions>
 
                 <StakeDialog

@@ -117,8 +117,21 @@ class BpList extends React.Component {
 
         Auth.accountInfo().then(() => {
             this.fetchData();
-        })
+        });
     };
+
+    componentDidMount() {
+        this.onChangeNet = Auth.onChangeNet(() => {
+            this.fetchData();
+            Auth.accountInfo().then(() => {
+                this.fetchData();
+            });
+        });
+    }
+
+    componentWillUnmount() {
+        Auth.removeOnChangeNet(this.onChangeNet);
+    }
 
     showSnack(text, timeout = null) {
         let action = null;
@@ -193,7 +206,6 @@ class BpList extends React.Component {
     };
 
     vote() {
-        console.log(this.state);
         Auth.withEos(eos => {
             eos.transaction(tr => {
                 tr.voteproducer({
