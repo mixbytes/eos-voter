@@ -1,25 +1,32 @@
 import React from 'react';
-import Card from "@material-ui/core/es/Card/Card";
-import Typography from "@material-ui/core/es/Typography/Typography";
-import withStyles from "@material-ui/core/es/styles/withStyles";
-import Table from "@material-ui/core/es/Table/Table";
-import TableRow from "@material-ui/core/es/TableRow/TableRow";
-import CardHeader from "@material-ui/core/es/CardHeader/CardHeader";
-import CardContent from "@material-ui/core/es/CardContent/CardContent";
-import TableCell from "@material-ui/core/es/TableCell/TableCell";
-import TableBody from "@material-ui/core/es/TableBody/TableBody";
+import {withStyles} from '@material-ui/core/styles/index';
+
+import {
+    Button,
+    CloseIcon,
+    MenuItem,
+    Card,
+    Select,
+    Dialog,
+    Typography,
+    DialogTitle,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    CardHeader,
+    CardContent,
+    CardActions,
+    Table,
+    TableBody,
+    TableCell,
+    TablePagination,
+    TableFooter,
+    TableRow,
+    TableHead
+} from "@material-ui/core/index";
 
 import Auth from '../common/eos';
-import DialogActions from "@material-ui/core/es/DialogActions/DialogActions";
-import Button from "@material-ui/core/es/Button/Button";
-import CardActions from "@material-ui/core/es/CardActions/CardActions";
-import Dialog from "@material-ui/core/es/Dialog/Dialog";
-import DialogTitle from "@material-ui/core/es/DialogTitle/DialogTitle";
-import DialogContent from "@material-ui/core/es/DialogContent/DialogContent";
-import DialogContentText from "@material-ui/core/es/DialogContentText/DialogContentText";
-import TextField from "@material-ui/core/es/TextField/TextField";
-import Select from "@material-ui/core/es/Select/Select";
-import MenuItem from "@material-ui/core/es/MenuItem/MenuItem";
+
 
 const styles = theme => ({
     root: {

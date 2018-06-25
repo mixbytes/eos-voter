@@ -1,23 +1,26 @@
 import React from 'react';
-import Card from "@material-ui/core/es/Card/Card";
-import Typography from "@material-ui/core/es/Typography/Typography";
-import Table from "@material-ui/core/es/Table/Table";
-import TableRow from "@material-ui/core/es/TableRow/TableRow";
-import CardHeader from "@material-ui/core/es/CardHeader/CardHeader";
-import CardContent from "@material-ui/core/es/CardContent/CardContent";
-import TableCell from "@material-ui/core/es/TableCell/TableCell";
-import TableBody from "@material-ui/core/es/TableBody/TableBody";
-import CardActions from "@material-ui/core/es/CardActions/CardActions";
-import Button from "@material-ui/core/es/Button/Button";
-import Dialog from "@material-ui/core/es/Dialog/Dialog";
-import DialogTitle from "@material-ui/core/es/DialogTitle/DialogTitle";
-import DialogContent from "@material-ui/core/es/DialogContent/DialogContent";
-import DialogContentText from "@material-ui/core/es/DialogContentText/DialogContentText";
-import TextField from "@material-ui/core/es/TextField/TextField";
-import DialogActions from "@material-ui/core/es/DialogActions/DialogActions";
-import Snackbar from "@material-ui/core/es/Snackbar/Snackbar";
-import IconButton from "@material-ui/core/es/IconButton/IconButton";
-import CloseIcon from '@material-ui/icons/Close';
+
+import {
+    Button,
+    CloseIcon,
+    TextField,
+    Card,
+    Snackbar,
+    Dialog,
+    Typography,
+    DialogTitle,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    CardHeader,
+    CardContent,
+    CardActions,
+    Table,
+    TableBody,
+    TableCell,
+    IconButton,
+    TableRow,
+} from "@material-ui/core/index";
 
 import Auth from '../common/eos';
 
