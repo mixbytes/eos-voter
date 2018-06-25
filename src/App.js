@@ -1,16 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {withStyles} from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import createMuiTheme from "@material-ui/core/es/styles/createMuiTheme";
-import MuiThemeProvider from "@material-ui/core/es/styles/MuiThemeProvider";
+import {withStyles} from '@material-ui/core/styles/index';
+import createMuiTheme from "@material-ui/core/styles/createMuiTheme";
+import MuiThemeProvider from "@material-ui/core/styles/MuiThemeProvider";
 
 import BpList from './components/BpList';
 import ChainInfo from "./components/ChainInfo";
 import AccountInfo from './components/AccountInfo';
+
+import {
+    Button,
+    CloseIcon,
+    AppBar,
+    Toolbar,
+    Typography,
+} from "@material-ui/core/index";
 
 import Auth from './common/eos';
 

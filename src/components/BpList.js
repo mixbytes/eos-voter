@@ -1,25 +1,27 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {withStyles} from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableRow from '@material-ui/core/TableRow';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import Checkbox from '@material-ui/core/Checkbox';
 import {lighten} from '@material-ui/core/styles/colorManipulator';
-import Card from "@material-ui/core/es/Card/Card";
-import CardContent from "@material-ui/core/es/CardContent/CardContent";
-import CardHeader from "@material-ui/core/es/CardHeader/CardHeader";
-import CardActions from "@material-ui/core/es/CardActions/CardActions";
-import Button from "@material-ui/core/es/Button/Button";
-import TableHead from "@material-ui/core/es/TableHead/TableHead";
-import Snackbar from "@material-ui/core/es/Snackbar/Snackbar";
-import IconButton from "@material-ui/core/es/IconButton/IconButton";
-import CloseIcon from '@material-ui/icons/Close';
-import TableFooter from "@material-ui/core/es/TableFooter/TableFooter";
-import TablePagination from "@material-ui/core/es/TablePagination/TablePagination";
+import {
+    Button,
+    CloseIcon,
+    Toolbar,
+    Card,
+    Snackbar,
+    Checkbox,
+    Typography,
+    IconButton,
+    CardHeader,
+    CardContent,
+    CardActions,
+    Table,
+    TableBody,
+    TableCell,
+    TablePagination,
+    TableFooter,
+    TableRow,
+    TableHead
+} from "@material-ui/core/index";
 
 import Auth from '../common/eos';
 
