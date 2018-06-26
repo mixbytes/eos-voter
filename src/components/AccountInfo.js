@@ -2,7 +2,6 @@ import React from 'react';
 
 import {
     Button,
-    CloseIcon,
     TextField,
     Card,
     Snackbar,
@@ -21,6 +20,9 @@ import {
     IconButton,
     TableRow,
 } from "@material-ui/core/index";
+
+
+import CloseIcon from '@material-ui/icons/Close';
 
 import Auth from '../common/eos';
 
@@ -63,7 +65,7 @@ class StakeDialog extends React.Component {
                     <DialogTitle id="stake-dialog-title">Stake</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            Enter the amount of money for stake.
+                            Enter the delta of stake (negative/positive).
                         </DialogContentText>
                         {this.props.fields.map((f, idx) => (
                             <TextField
@@ -118,15 +120,18 @@ class AccountInfo extends React.Component {
             snackTimeout: null,
             snackAction: null,
         };
-
-        this.fetchData();
     }
 
     componentDidMount() {
+        this.mounted = true;
+
+        this.fetchData();
         this.onChangeNet = Auth.onChangeNet(() => {this.fetchData()});
     }
 
     componentWillUnmount() {
+        this.mounted = false;
+
         Auth.removeOnChangeNet(this.onChangeNet);
     }
 
@@ -151,10 +156,11 @@ class AccountInfo extends React.Component {
             data[3].value = acc.total_resources.cpu_weight;
             data[4].value = acc.total_resources.net_weight;
 
-            this.setState({
-                data: data,
-                acc: acc,
-            });
+            if (this.mounted)
+                this.setState({
+                    data: data,
+                    acc: acc,
+                });
         });
     }
 
@@ -163,30 +169,50 @@ class AccountInfo extends React.Component {
 
         Auth.withEos(eos => {
             eos.transaction(tr => {
-                let method = 'delegatebw';
-                let stake_cpu_field = 'stake_cpu_quantity';
-                let stake_net_field = 'stake_net_quantity';
-                if (data.net[0] === '-' && data.cpu[0] === '-' ) {
+                let netPrefix = '';
+                if (data.net[0] === '-') {
                     data.net = data.net.slice(1);
-                    data.cpu = data.cpu.slice(1);
-                    method = 'undelegatebw';
-                    stake_cpu_field = 'un' + stake_cpu_field;
-                    stake_net_field = 'un' + stake_net_field;
+                    netPrefix = 'un';
                 }
 
-                console.log(data);
+                let cpuPrefix = '';
+                if (data.cpu[0] === '-') {
+                    data.cpu = data.cpu.slice(1);
+                    cpuPrefix = 'un';
+                }
 
-                tr[method]({
-                    from: this.state.acc.account_name,
-                    receiver: this.state.acc.account_name,
+                if (cpuPrefix === netPrefix) {
+                    tr[netPrefix + 'delegatebw']({
+                        from: this.state.acc.account_name,
+                        receiver: this.state.acc.account_name,
 
-                    [stake_cpu_field]: data.net + ' EOS',
-                    [stake_net_field]: data.cpu + ' EOS',
+                        [netPrefix + 'stake_cpu_quantity']: data.net + ' EOS',
+                        [netPrefix + 'stake_net_quantity']: data.cpu + ' EOS',
 
-                    transfer: 0
-                }, {
-                    authorization: this.state.acc.account_name
-                });
+                        transfer: 0
+                    });
+                }
+                else {
+                    tr[netPrefix + 'delegatebw']({
+                        from: this.state.acc.account_name,
+                        receiver: this.state.acc.account_name,
+
+                        [netPrefix + 'stake_net_quantity']: data.net + ' EOS',
+
+                        [netPrefix + 'stake_cpu_quantity']: '0.0000 EOS',
+                        transfer: 0
+                    });
+
+                    tr[cpuPrefix + 'delegatebw']({
+                        from: this.state.acc.account_name,
+                        receiver: this.state.acc.account_name,
+
+                        [cpuPrefix + 'stake_cpu_quantity']: data.cpu + ' EOS',
+
+                        [cpuPrefix + 'stake_net_quantity']: '0.0000 EOS',
+                        transfer: 0
+                    });
+                }
             }).then(() => {
                 this.showSnack("Success Stake", 1500);
                 this.fetchData();
@@ -293,8 +319,8 @@ class AccountInfo extends React.Component {
                     onClose={() => this.setState({openDialog: false})}
                     onOk={(data) => this.stake(data)}
                     fields={[
-                        {name: 'cpu', placeholder: 'CPU stake', checker: (val) => this.checker(val) },
-                        {name: 'net', placeholder: 'NET stake', checker: (val) => this.checker(val) },
+                        {name: 'cpu', placeholder: 'CPU stake delta', checker: (val) => this.checker(val) },
+                        {name: 'net', placeholder: 'NET stake delta', checker: (val) => this.checker(val) },
                     ]}
                     checker={(data) => this.check(data)}
                 />

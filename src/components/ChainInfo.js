@@ -3,7 +3,6 @@ import {withStyles} from '@material-ui/core/styles/index';
 
 import {
     Button,
-    CloseIcon,
     MenuItem,
     Card,
     Select,
@@ -19,10 +18,7 @@ import {
     Table,
     TableBody,
     TableCell,
-    TablePagination,
-    TableFooter,
     TableRow,
-    TableHead
 } from "@material-ui/core/index";
 
 import Auth from '../common/eos';
@@ -113,15 +109,19 @@ class ChainInfo extends React.Component {
 
             openDialog: false
         };
-
-        this.fetchData();
     }
 
     componentDidMount() {
-        this.onChangeNet = Auth.onChangeNet(() => {this.fetchData()});
+        this.mounted = true;
+
+        this.fetchData();
+        this.onChangeNet = Auth.onChangeNet(() => {
+            this.fetchData();
+        });
     }
 
     componentWillUnmount() {
+        this.mounted = false;
         Auth.removeOnChangeNet(this.onChangeNet);
     }
 
@@ -135,7 +135,8 @@ class ChainInfo extends React.Component {
             data[3].value = (info.total_activated_stake / 10000).toFixed(4) + ' EOS';
             data[4].value = (info.total_activated_stake / 10000000000000 * 100).toFixed(3) + ' %';
 
-            this.setState({data: data});
+            if (this.mounted)
+                this.setState({data: data});
         });
     }
 

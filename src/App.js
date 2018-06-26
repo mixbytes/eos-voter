@@ -10,7 +10,6 @@ import AccountInfo from './components/AccountInfo';
 
 import {
     Button,
-    CloseIcon,
     AppBar,
     Toolbar,
     Typography,
@@ -47,7 +46,9 @@ const theme = createMuiTheme({
 
 class App extends React.Component {
     componentDidMount() {
-        this.onChangeNet = Auth.onChangeNet(() => {this.forceUpdate()});
+        this.onChangeNet = Auth.onChangeNet(() => {
+            this.forceUpdate();
+        });
     }
 
     componentWillUnmount() {

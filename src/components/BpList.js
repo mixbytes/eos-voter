@@ -4,7 +4,6 @@ import {withStyles} from '@material-ui/core/styles';
 import {lighten} from '@material-ui/core/styles/colorManipulator';
 import {
     Button,
-    CloseIcon,
     Toolbar,
     Card,
     Snackbar,
@@ -22,6 +21,8 @@ import {
     TableRow,
     TableHead
 } from "@material-ui/core/index";
+
+import CloseIcon from '@material-ui/icons/Close';
 
 import Auth from '../common/eos';
 
@@ -114,15 +115,17 @@ class BpList extends React.Component {
 
             tablePage: 0,
         };
+    };
+
+    componentDidMount() {
+        this.mounted = true;
 
         this.fetchData();
 
         Auth.accountInfo().then(() => {
             this.fetchData();
         });
-    };
 
-    componentDidMount() {
         this.onChangeNet = Auth.onChangeNet(() => {
             this.fetchData();
             Auth.accountInfo().then(() => {
@@ -132,6 +135,8 @@ class BpList extends React.Component {
     }
 
     componentWillUnmount() {
+        this.mounted = false;
+
         Auth.removeOnChangeNet(this.onChangeNet);
     }
 
@@ -188,7 +193,8 @@ class BpList extends React.Component {
 
             data.acc = acc;
 
-            this.setState(data);
+            if (this.mounted)
+                this.setState(data);
         });
     }
 

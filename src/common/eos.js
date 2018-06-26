@@ -3,6 +3,8 @@ import Cookie from 'js-cookie'
 
 const Eos = require('eosjs');
 
+let cbCnt = 0;
+
 class Auth {
     constructor() {
         if (window.scatter) {
@@ -40,14 +42,15 @@ class Auth {
     selectedAcc = 0;
     logged = false;
 
-    onChangeNetCbs = [];
+    onChangeNetCbs = new Map();
 
     removeOnChangeNet(idx) {
-        delete this.onChangeNetCbs[idx];
+        this.onChangeNetCbs.delete(idx);
     }
 
     onChangeNet(cb) {
-        this.onChangeNetCbs.push(cb);
+        this.onChangeNetCbs.set(cbCnt, cb);
+        return cbCnt++;
     }
 
     async changeNetwork(net = 'jungle') {
@@ -71,7 +74,7 @@ class Auth {
             this.network.host + ':' +this.network.port,
         });
 
-        this.onChangeNetCbs.forEach(cb => {if (cb) cb()});
+        this.onChangeNetCbs.forEach(cb => cb());
     }
 
     async login() {
@@ -85,6 +88,7 @@ class Auth {
                 blockchain: 'eos',
                 host: this.network.host,
                 port: this.network.port,
+                protocol: this.network.protocol,
                 chainId: this.network.byChainId ? this.network.chainId : null
             };
 
