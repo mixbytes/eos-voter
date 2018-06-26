@@ -145,7 +145,15 @@ class Auth {
     }
 
     async getProducers() {
-        return (await this.eos.getProducers({json: true, limit: 1000})).rows;
+        let resp = await this.eos.getProducers({json: true, limit: 500});
+        let prods = resp.rows;
+
+        while (resp.more) {
+            resp = await this.eos.getProducers({json: true, limit: 500, lower_bound: resp.more});
+            prods = prods.concat(resp.rows);
+        }
+
+        return prods;
     }
 
     withEos(cb) {
