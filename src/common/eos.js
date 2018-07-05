@@ -31,7 +31,7 @@ class Auth {
 
         this.eos = Eos.modules.api({
             chainId: this.network.chainId, httpEndpoint: this.network.protocol + '://' +
-            this.network.host + ':' +this.network.port,
+            this.network.host + this.network.port,
         });
 
         console.log(this.selectedNet);
@@ -71,7 +71,7 @@ class Auth {
 
         this.eos = Eos.modules.api({
             chainId: this.network.chainId, httpEndpoint: this.network.protocol + '://' +
-            this.network.host + ':' +this.network.port,
+            this.network.host + this.network.port,
         });
 
         this.onChangeNetCbs.forEach(cb => cb());
