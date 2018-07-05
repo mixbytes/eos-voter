@@ -1,14 +1,9 @@
-FROM node:9 as builder
+FROM node:9.11-alpine as builder
 
-ADD . /eos-voter
-WORKDIR /eos-voter
+WORKDIR /app
+COPY . .
 RUN npm i
 RUN npm run build
 
-
-FROM nginx
-
-RUN mkdir -p /www/eos-voter
-COPY --from=builder /eos-voter/build /www/eos-voter/build
-
-EXPOSE 8080
+FROM nginx:1.15.1-alpine
+COPY --from=builder /app/build /var/www
