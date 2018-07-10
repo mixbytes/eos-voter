@@ -6,7 +6,8 @@ export default {
             host: "eos-voting.smartz.io/api/jungle",
             port: "",
             protocol: "https",
-            byChainId: true
+            byChainId: true,
+            featuredBps: ['okapitestnet', 'komododragon'],
         },
 
         mainnet: {
@@ -15,7 +16,8 @@ export default {
             host: "eos-voting.smartz.io/api/mainnet",
             port: "",
             protocol: "https",
-            byChainId: true
+            byChainId: true,
+            featuredBps: ['mixbytevaran', 'mixbytes1234'],
         }
     },
     defaultNetwork: 'mainnet',

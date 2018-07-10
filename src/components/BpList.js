@@ -19,7 +19,8 @@ import {
     TablePagination,
     TableFooter,
     TableRow,
-    TableHead
+    TableHead,
+    TextField
 } from "@material-ui/core/index";
 
 import CloseIcon from '@material-ui/icons/Close';
@@ -37,6 +38,10 @@ const styles = theme => ({
     listActions: {
         textAlign: "center"
     },
+    searchField: {
+        marginRight: 20,
+        marginTop: 5
+    }
 });
 
 const toolbarStyles = theme => ({
@@ -62,6 +67,10 @@ const toolbarStyles = theme => ({
     title: {
         flex: '0 0 auto',
     },
+    searchButton: {
+        marginLeft: 10
+    },
+
 });
 
 let TableToolbar = props => {
@@ -71,21 +80,23 @@ let TableToolbar = props => {
         return null;
 
     return (
-        <Toolbar className={classes.highlight}>
-            <div className={classes.title}>
-                {
-                    Auth.isLogged() ? (
-                        <Typography color="inherit" variant="subheading">
-                            Vote set is changed, click "SAVE VOTES" for save
-                        </Typography>
-                    ) : (
-                        <Typography color="inherit" variant="subheading">
-                            For vote need login
-                        </Typography>
-                    )
-                }
-            </div>
-        </Toolbar>
+        <div>
+            <Toolbar className={changed ? classes.highlight : {}}>
+                <div className={classes.title}>
+                    {
+                        Auth.isLogged() ? (
+                            <Typography color="inherit" variant="subheading">
+                                Vote set is changed, click "SAVE VOTES" for save
+                            </Typography>
+                        ) : (
+                            <Typography color="inherit" variant="subheading">
+                                For vote need login
+                            </Typography>
+                        )
+                    }
+                </div>
+              </Toolbar>
+        </div>
     );
 };
 
@@ -114,6 +125,8 @@ class BpList extends React.Component {
             snackAction: null,
 
             tablePage: 0,
+
+            searchPref: null
         };
     };
 
@@ -234,6 +247,15 @@ class BpList extends React.Component {
         });
     }
 
+    handleSearch(text) {
+        if (text.length > 0) {
+            console.log(text);
+            this.setState({searchPref: text});
+        } else if (this.state.searchPref) {
+            this.setState({searchPref: null});
+        }
+    }
+
     render() {
         const { classes } = this.props;
 
@@ -241,6 +263,14 @@ class BpList extends React.Component {
             <Card className={classes.root}>
                 <CardHeader
                     title="Block Producers List"
+                    action={(
+                        <TextField
+                            className={classes.searchField}
+                            placeholder={"enter for search"}
+                            autoFocus={true}
+                            onChange={(ev) => this.handleSearch(ev.target.value)}
+                        />
+                    )}
                 />
                 <CardContent>
                     <TableToolbar
@@ -251,9 +281,13 @@ class BpList extends React.Component {
                             this.setState({selected: this.state.selected})
                         }}
                     />
-                    <Table className={classes.table} aria-labelledby="tableTitle">
+                    <Table
+                        className={classes.table}
+                        aria-labelledby="tableTitle"
+                    >
                         <TableHead>
                             <TableRow>
+                                <TableCell>#</TableCell>
                                 <TableCell>Vote</TableCell>
                                 <TableCell>Name</TableCell>
                                 <TableCell>Url</TableCell>
@@ -261,7 +295,10 @@ class BpList extends React.Component {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {this.state.producers.slice(10 * this.state.tablePage, 10 * this.state.tablePage + 10).map((n, idx) => {
+                            {this.state.producers
+                                .filter(n => !this.state.searchPref || (this.state.searchPref && n.owner.startsWith(this.state.searchPref)))
+                                .slice(10 * this.state.tablePage, 10 * this.state.tablePage + 10)
+                                .map((n, idx) => {
                                 return (
                                     <TableRow
                                         hover
@@ -271,6 +308,7 @@ class BpList extends React.Component {
                                         key={idx}
                                         selected={this.state.selected.has(n.owner)}
                                     >
+                                        <TableCell>{n.idx + 1}</TableCell>
                                         <TableCell padding="checkbox">
                                             <Checkbox
                                                 checked={this.state.selected.has(n.owner)}

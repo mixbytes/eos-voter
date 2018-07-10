@@ -130,7 +130,7 @@ class ChainInfo extends React.Component {
             let data = this.state.data;
 
             data[0].value = info.name;
-            data[1].value = info.host + ':' + info.port;
+            data[1].value = info.host + (info.port.length ? (':' + info.port) : '');
             data[2].value = info.chain_id.substr(0, 35) + '...';
             data[3].value = (info.total_activated_stake / 10000).toFixed(4) + ' EOS';
             data[4].value = (info.total_activated_stake / 10000000000000 * 100).toFixed(3) + ' %';

@@ -153,6 +153,15 @@ class Auth {
             prods = prods.concat(resp.rows);
         }
 
+        prods = prods.map((p, idx) => { p.idx = idx; return p});
+
+        if (this.network.featuredBps)
+            this.network.featuredBps.forEach(it => {
+                let idx = prods.findIndex(el => el.owner === it);
+                let el = prods.splice(idx, 1)[0];
+                prods.unshift(el);
+            });
+
         return prods;
     }
 
